@@ -50,23 +50,9 @@
             cursor: pointer;
         }
 
-        #attachFileBtn {
-            padding: 10px;
-            margin: 5px;
-            border: 1px solid green;
-            border-radius: 5px;
-            background-color: black;
-            color: white;
-            cursor: pointer;
-        }
-
         .message-date {
             color: #a0a0a0;
             font-size: 0.8em;
-        }
-
-        .hidden {
-            display: none;
         }
     </style>
 </head>
@@ -79,8 +65,6 @@
         <section>
             <input type="text" id="nickname" required autocomplete="off" maxlength="30" placeholder="Username:">
             <input type="text" id="message" required autocomplete="off" placeholder="Post:">
-            <input type="file" id="fileInput" class="hidden">
-            <button id="attachFileBtn">&#128206;</button>
             <button id="sharePostBtn">Enviar</button>
             <h1 class="titulo">Posts:</h1>
             <ul id="messageList"></ul>
@@ -91,7 +75,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
         import { getDatabase, ref, set, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBoQUZVo5GvpIt1Diw0Dh7VMwKzbmFonv0",
@@ -107,11 +90,8 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
-        const storage = getStorage(app);
 
         var messageList = document.getElementById('messageList');
-        var fileInput = document.getElementById('fileInput');
-        var selectedFile = null;
 
         function sendMessage() {
             var nickname = document.getElementById('nickname').value;
@@ -122,31 +102,14 @@
             if (nickname && message) {
                 var messagesRef = ref(database, 'messages');
                 var newMessageRef = push(messagesRef);
-                
-                if (selectedFile) {
-                    var fileRef = storageRef(storage, 'uploads/' + selectedFile.name);
-                    uploadBytes(fileRef, selectedFile).then((snapshot) => {
-                        getDownloadURL(snapshot.ref).then((downloadURL) => {
-                            set(newMessageRef, {
-                                nickname: nickname,
-                                message: message,
-                                fileUrl: downloadURL,
-                                timestamp: new Date().toLocaleString()
-                            }).catch((error) => {
-                                console.error("Erro ao enviar a mensagem:", error);
-                            });
-                        });
-                    });
-                    selectedFile = null;
-                } else {
-                    set(newMessageRef, {
-                        nickname: nickname,
-                        message: message,
-                        timestamp: new Date().toLocaleString()
-                    }).catch((error) => {
-                        console.error("Erro ao enviar a mensagem:", error);
-                    });
-                }
+
+                set(newMessageRef, {
+                    nickname: nickname,
+                    message: message,
+                    timestamp: new Date().toLocaleString()
+                }).catch((error) => {
+                    console.error("Erro ao enviar a mensagem:", error);
+                });
             }
         }
 
@@ -154,11 +117,9 @@
             var nickname = snapshot.val().nickname;
             var message = snapshot.val().message;
             var timestamp = snapshot.val().timestamp;
-            var fileUrl = snapshot.val().fileUrl;
 
             var li = document.createElement('li');
-            li.innerHTML = nickname + ': ' + message + '<br>' + 
-                           (fileUrl ? '<a href="' + fileUrl + '" target="_blank">Anexo</a><br>' : '') +
+            li.innerHTML = nickname + ': ' + message + '<br>' +
                            '<span class="message-date">' + timestamp + '</span>';
 
             messageList.prepend(li);
@@ -170,10 +131,6 @@
         });
 
         document.getElementById('sharePostBtn').addEventListener('click', sendMessage);
-        document.getElementById('attachFileBtn').addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', function(event) {
-            selectedFile = event.target.files[0];
-        });
     </script>
 </body>
 </html>
