@@ -130,7 +130,7 @@
           showMessage(snapshot);
 
           var messageCount = messageList.childElementCount;
-          if (messageCount > 100) {
+          if (messageCount > 1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000) {
               var oldestMessageKey = messageList.children[messageCount - 1].dataset.key;
               var oldestMessageRef = ref(database, 'messages/' + oldestMessageKey);
 
