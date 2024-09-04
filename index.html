@@ -54,6 +54,12 @@
             color: #a0a0a0;
             font-size: 0.8em;
         }
+
+        .message-image {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -118,10 +124,27 @@
             var message = snapshot.val().message;
             var timestamp = snapshot.val().timestamp;
 
-            var li = document.createElement('li');
-            li.innerHTML = nickname + ': ' + message + '<br>' +
-                           '<span class="message-date">' + timestamp + '</span>';
+            var photoRegex = /\(Foto:(https?:\/\/[^\s]+)\)/i;
+            var photoMatch = message.match(photoRegex);
 
+            var li = document.createElement('li');
+
+            if (photoMatch) {
+                var imageUrl = photoMatch[1];
+                message = message.replace(photoRegex, '');
+
+                var img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = "Imagem enviada";
+                img.className = "message-image";
+
+                li.innerHTML = nickname + ': ' + message + '<br>';
+                li.appendChild(img);
+            } else {
+                li.innerHTML = nickname + ': ' + message + '<br>';
+            }
+
+            li.innerHTML += '<span class="message-date">' + timestamp + '</span>';
             messageList.prepend(li);
         }
 
