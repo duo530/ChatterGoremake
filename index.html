@@ -54,6 +54,10 @@
             color: #a0a0a0;
             font-size: 0.8em;
         }
+
+        #nameForm {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -62,11 +66,13 @@
         <h1 class="titulo">ChatterGo</h1>
         <p class="subtitulo">Fórum aleatório, programado por recoil999 (html sênior) (todos os créditos vão a ele)</p>
 
-        <section id="nameSection">
-            <!-- Input de nome será exibido aqui -->
-        </section>
+        <div id="nameForm">
+            <h2 class="titulo">Defina seu nome:</h2>
+            <input type="text" id="nicknameInput" required autocomplete="off" maxlength="30" placeholder="Username:">
+            <button id="saveNameBtn">Salvar Nome</button>
+        </div>
 
-        <section id="chatSection" style="display:none;">
+        <section id="chatSection" style="display: none;">
             <input type="text" id="message" required autocomplete="off" placeholder="Post:">
             <button id="sharePostBtn">Enviar</button>
             <h1 class="titulo">Posts:</h1>
@@ -77,7 +83,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
-        import { getDatabase, ref, set, push, onChildAdded, get, child } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, set, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBoQUZVo5GvpIt1Diw0Dh7VMwKzbmFonv0",
@@ -94,67 +100,39 @@
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
 
-        const nameSection = document.getElementById('nameSection');
-        const chatSection = document.getElementById('chatSection');
-
-        const verifiedIcon = '<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkZLCg3-xAtKLls3HZirBjhCO80UnhBHOH0BQupNK7EQ&s" alt="Verified" style="width: 16px; height: 16px; vertical-align: middle;">';
-
-        let nickname = localStorage.getItem('nickname');
-
-        function checkNameExists(name) {
-            const namesRef = ref(database, 'names');
-            return get(child(namesRef, name)).then(snapshot => {
-                return snapshot.exists();
-            });
+        function checkAndSetName() {
+            const savedName = localStorage.getItem('nickname');
+            if (savedName) {
+                showChat();
+            } else {
+                document.getElementById('nameForm').style.display = 'block';
+            }
         }
 
-        function saveName(name) {
-            const namesRef = ref(database, 'names/' + name);
-            return set(namesRef, true);
+        function showChat() {
+            document.getElementById('nameForm').style.display = 'none';
+            document.getElementById('chatSection').style.display = 'block';
         }
 
-        function promptForName() {
-            nameSection.innerHTML = `
-                <p>Defina seu nome:</p>
-                <input type="text" id="nameInput" required autocomplete="off" maxlength="30" placeholder="Username:">
-                <button id="saveNameBtn">Salvar Nome</button>
-            `;
+        async function saveName() {
+            const nicknameInput = document.getElementById('nicknameInput').value;
 
-            document.getElementById('saveNameBtn').addEventListener('click', () => {
-                const nameInput = document.getElementById('nameInput').value;
+            if (nicknameInput) {
+                const namesRef = ref(database, `names/${nicknameInput}`);
+                const snapshot = await get(namesRef);
 
-                if (nameInput) {
-                    checkNameExists(nameInput).then(exists => {
-                        if (exists) {
-                            alert("Esse nome já está em uso, escolha outro.");
-                        } else {
-                            saveName(nameInput).then(() => {
-                                localStorage.setItem('nickname', nameInput);
-                                nickname = nameInput;
-                                showChatSection();
-                            }).catch(error => {
-                                console.error("Erro ao salvar o nome:", error);
-                            });
-                        }
-                    }).catch(error => {
-                        console.error("Erro ao verificar o nome:", error);
-                    });
+                if (!snapshot.exists()) {
+                    await set(namesRef, { nickname: nicknameInput });
+                    localStorage.setItem('nickname', nicknameInput);
+                    showChat();
+                } else {
+                    alert('Esse nome já está em uso, escolha outro.');
                 }
-            });
-        }
-
-        function showChatSection() {
-            nameSection.style.display = 'none';
-            chatSection.style.display = 'block';
-        }
-
-        if (!nickname) {
-            promptForName();
-        } else {
-            showChatSection();
+            }
         }
 
         function sendMessage() {
+            const nickname = localStorage.getItem('nickname');
             const messageInput = document.getElementById('message');
             const message = messageInput.value;
             messageInput.value = '';
@@ -167,7 +145,7 @@
                     nickname: nickname,
                     message: message,
                     timestamp: new Date().toLocaleString()
-                }).catch(error => {
+                }).catch((error) => {
                     console.error("Erro ao enviar a mensagem:", error);
                 });
             }
@@ -179,23 +157,27 @@
             const timestamp = snapshot.val().timestamp;
 
             const li = document.createElement('li');
+
             if (nickname === 'simpleuser') {
-                li.innerHTML = verifiedIcon + ' ' + nickname + ': ' + message + '<br>' +
-                               '<span class="message-date">' + timestamp + '</span>';
+                li.innerHTML = `<strong>${nickname} <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkZLCg3-xAtKLls3HZirBjhCO80UnhBHOH0BQupNK7EQ&s" alt="Verificado"></strong>: ${message}<br>` +
+                               `<span class="message-date">${timestamp}</span>`;
             } else {
-                li.innerText = nickname + ': ' + message + '\n' +
-                               timestamp;
+                li.innerText = `${nickname}: ${message}\n${timestamp}`;
+                li.querySelector('.message-date').innerText = timestamp;
             }
 
             messageList.prepend(li);
         }
+
+        document.getElementById('saveNameBtn').addEventListener('click', saveName);
+        document.getElementById('sharePostBtn').addEventListener('click', sendMessage);
 
         const messagesRef = ref(database, 'messages');
         onChildAdded(messagesRef, function(snapshot) {
             showMessage(snapshot);
         });
 
-        document.getElementById('sharePostBtn').addEventListener('click', sendMessage);
+        checkAndSetName();
     </script>
 </body>
 </html>
