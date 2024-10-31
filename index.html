@@ -7,30 +7,24 @@
         .titulo {
             color: white;
         }
-
         .container {
             text-align: center;
         }
-
         .subtitulo {
             color: white;
             opacity: 50%;
         }
-
         body {
             background: black;
         }
-
         #messageList {
             list-style: none;
             padding: 0;
         }
-
         #messageList li {
             color: white;
             margin-bottom: 10px;
         }
-
         input {
             padding: 10px;
             margin: 5px;
@@ -39,7 +33,6 @@
             background-color: black;
             color: white;
         }
-
         #sharePostBtn {
             padding: 10px;
             margin: 5px;
@@ -49,12 +42,10 @@
             color: white;
             cursor: pointer;
         }
-
         .message-date {
             color: #a0a0a0;
             font-size: 0.8em;
         }
-
         .message-image {
             max-width: 100%;
             height: auto;
@@ -69,7 +60,6 @@
         <p class="subtitulo">Fórum aleatório, programado por recoil999 (html sênior) (todos os créditos vão a ele)</p>
 
         <section>
-            <input type="text" id="nickname" required autocomplete="off" maxlength="30" placeholder="Username:">
             <input type="text" id="message" required autocomplete="off" placeholder="Post:">
             <button id="sharePostBtn">Enviar</button>
             <h1 class="titulo">Posts:</h1>
@@ -78,6 +68,14 @@
     </div>
 
     <script type="module">
+        function checkCookies() {
+            if (document.cookie === "") {
+                window.location.href = "/register.html";
+            }
+        }
+        
+        checkCookies();
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
         import { getDatabase, ref, set, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
@@ -99,8 +97,15 @@
 
         var messageList = document.getElementById('messageList');
 
+        function getCookieValue(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
         function sendMessage() {
-            var nickname = document.getElementById('nickname').value;
+            var nickname = getCookieValue("username"); 
             var messageInput = document.getElementById('message');
             var message = messageInput.value;
             messageInput.value = '';
