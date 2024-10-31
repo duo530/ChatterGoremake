@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar - ChatterGo</title>
+    <style>
+        .titulo {
+            color: white;
+        }
+        .container {
+            text-align: center;
+        }
+        .subtitulo {
+            color: white;
+            opacity: 50%;
+        }
+        body {
+            background: black;
+        }
+        input {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid green;
+            border-radius: 5px;
+            background-color: black;
+            color: white;
+        }
+        #registerBtn {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid green;
+            border-radius: 5px;
+            background-color: black;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="titulo">ChatterGo</h1>
+        <p>Insira seu nome:</p>
+        <input type="text" id="username" required autocomplete="off" maxlength="30" placeholder="Nome">
+        <button id="registerBtn">Registrar</button>
+    </div>
+
+    <script>
+        document.getElementById('registerBtn').addEventListener('click', function() {
+            var username = document.getElementById('username').value;
+            if (username) {
+                document.cookie = "username=" + encodeURIComponent(username) + "; path=/";
+                window.location.href = "/";
+            }
+        });
+    </script>
+</body>
+</html>
