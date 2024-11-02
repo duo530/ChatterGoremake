@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -57,9 +58,6 @@
             vertical-align: middle;
             margin-right: 3px;
         }
-        #loading {
-            color: white;
-        }
     </style>
 </head>
 <body>
@@ -71,7 +69,6 @@
         <section>
             <input type="text" id="message" required autocomplete="off" placeholder="Post:">
             <button id="sharePostBtn">Enviar</button>
-            <h1 class="titulo" id="loading">Carregando...</h1> <!-- Mensagem de carregamento -->
             <h1 class="titulo">Posts:</h1>
             <ul id="messageList"></ul>
         </section>
@@ -88,7 +85,7 @@
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
-        import { getDatabase, ref, set, push, onChildAdded, get, child } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, set, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBoQUZVo5GvpIt1Diw0Dh7VMwKzbmFonv0",
@@ -106,7 +103,6 @@
         const database = getDatabase(app);
 
         var messageList = document.getElementById('messageList');
-        var loadingMessage = document.getElementById('loading');
 
         function getCookieValue(name) {
             const value = `; ${document.cookie}`;
@@ -183,33 +179,15 @@
         }
 
         var messagesRef = ref(database, 'messages');
-        let messageCount = 0;
-
-        // Primeiro, obtenha o número total de mensagens
-        get(child(database, 'messages')).then(snapshot => {
-            if (snapshot.exists()) {
-                messageCount = snapshot.size;
-                let loadedMessages = 0;
-
-                // Adiciona um ouvinte para mostrar mensagens quando são carregadas
-                onChildAdded(messagesRef, function(snapshot) {
-                    showMessage(snapshot).then(() => {
-                        loadedMessages++;
-                        // Se todas as mensagens foram carregadas, oculta a mensagem de carregamento
-                        if (loadedMessages === messageCount) {
-                            loadingMessage.style.display = 'none';
-                        }
-                    });
-                });
-            } else {
-                loadingMessage.style.display = 'none'; // Nenhuma mensagem para carregar
-            }
-        }).catch(error => {
-            console.error("Erro ao buscar mensagens:", error);
-            loadingMessage.style.display = 'none'; // Oculta mensagem de carregamento em caso de erro
+        onChildAdded(messagesRef, functio
+n(snapshot) {
+            showMessage(snapshot);
         });
 
         document.getElementById('sharePostBtn').addEventListener('click', sendMessage);
     </script>
 </body>
 </html>
+
+
+Faz enquanto as mensagens aqui carregam ele mostra um h1 escrito "Carregando..."
