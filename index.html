@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -127,8 +128,6 @@
                 }).catch((error) => {
                     console.error("Erro ao enviar a mensagem:", error);
                 });
-            } else {
-                alert("Insira um nome de usuário válido ou mensagem.");
             }
         }
 
@@ -180,7 +179,8 @@
         }
 
         var messagesRef = ref(database, 'messages');
-        onChildAdded(messagesRef, function(snapshot) {
+        onChildAdded(messagesRef, functio
+n(snapshot) {
             showMessage(snapshot);
         });
 
