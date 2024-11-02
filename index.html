@@ -52,8 +52,8 @@
             margin-top: 10px;
         }
         .admin-icon {
-            width: 100px;
-            height: 100px;
+            width: 10px;
+            height: 10px;
             vertical-align: middle;
             margin-right: 3px;
         }
@@ -74,6 +74,14 @@
     </div>
 
     <script type="module">
+        function checkCookies() {
+            if (document.cookie === "") {
+                alert("Ops! Você não tem uma conta. Para enviar mensagens, se registre em https://chattergo-lemon.vercel.app/registrar.html ou ignore esta mensagem e apenas leia mensagens.");
+            }
+        }
+        
+        checkCookies();
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
         import { getDatabase, ref, set, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
@@ -95,28 +103,77 @@
 
         var messageList = document.getElementById('messageList');
 
+        function getCookieValue(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
         function sendMessage() {
+            var nickname = getCookieValue("username"); 
             var messageInput = document.getElementById('message');
             var message = messageInput.value;
             messageInput.value = '';
 
-            var messagesRef = ref(database, 'messages');
-            var newMessageRef = push(messagesRef);
+            if (nickname && message) {
+                var messagesRef = ref(database, 'messages');
+                var newMessageRef = push(messagesRef);
 
-            set(newMessageRef, {
-                message: message,
-                timestamp: new Date().toLocaleString()
-            }).catch((error) => {
-                console.error("Erro ao enviar a mensagem:", error);
-            });
+                set(newMessageRef, {
+                    nickname: nickname,
+                    message: message,
+                    timestamp: new Date().toLocaleString()
+                }).catch((error) => {
+                    console.error("Erro ao enviar a mensagem:", error);
+                });
+            }
+        }
+
+        async function isAdmin(nickname) {
+            try {
+                const response = await fetch("https://chattergo-lemon.vercel.app/adms.txt");
+                const text = await response.text();
+                return text.split("\n").some(line => line.split(":")[0].trim() === nickname);
+            } catch (error) {
+                console.error("Erro ao carregar a lista de administradores:", error);
+                return false;
+            }
         }
 
         async function showMessage(snapshot) {
+            var nickname = snapshot.val().nickname;
             var message = snapshot.val().message;
             var timestamp = snapshot.val().timestamp;
 
             var li = document.createElement('li');
-            li.innerHTML = message + '<br><span class="message-date">' + timestamp + '</span>';
+
+            const isAdminUser = await isAdmin(nickname);
+            if (isAdminUser) {
+                var adminIcon = document.createElement('img');
+                adminIcon.src = "https://teste.com/foto.png";
+                adminIcon.alt = "Admin";
+                adminIcon.className = "admin-icon";
+                li.appendChild(adminIcon);
+            }
+
+            var photoRegex = /\(Foto:(https?:\/\/[^\s]+)\)/i;
+            var photoMatch = message.match(photoRegex);
+
+            li.innerHTML += nickname + ': ' + message;
+
+            if (photoMatch) {
+                var imageUrl = photoMatch[1];
+                message = message.replace(photoRegex, '');
+
+                var img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = "Imagem enviada";
+                img.className = "message-image";
+                li.appendChild(img);
+            } 
+            
+            li.innerHTML += '<br><span class="message-date">' + timestamp + '</span>';
             messageList.prepend(li);
         }
 
