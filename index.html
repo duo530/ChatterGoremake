@@ -88,7 +88,7 @@
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
-        import { getDatabase, ref, set, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, set, push, onChildAdded, get, child } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBoQUZVo5GvpIt1Diw0Dh7VMwKzbmFonv0",
@@ -183,13 +183,30 @@
         }
 
         var messagesRef = ref(database, 'messages');
+        let messageCount = 0;
 
-        onChildAdded(messagesRef, function(snapshot) {
-            showMessage(snapshot);
-        });
+        // Primeiro, obtenha o número total de mensagens
+        get(child(database, 'messages')).then(snapshot => {
+            if (snapshot.exists()) {
+                messageCount = snapshot.size;
+                let loadedMessages = 0;
 
-        onChildAdded(messagesRef, function() {
-            loadingMessage.style.display = 'none';
+                // Adiciona um ouvinte para mostrar mensagens quando são carregadas
+                onChildAdded(messagesRef, function(snapshot) {
+                    showMessage(snapshot).then(() => {
+                        loadedMessages++;
+                        // Se todas as mensagens foram carregadas, oculta a mensagem de carregamento
+                        if (loadedMessages === messageCount) {
+                            loadingMessage.style.display = 'none';
+                        }
+                    });
+                });
+            } else {
+                loadingMessage.style.display = 'none'; // Nenhuma mensagem para carregar
+            }
+        }).catch(error => {
+            console.error("Erro ao buscar mensagens:", error);
+            loadingMessage.style.display = 'none'; // Oculta mensagem de carregamento em caso de erro
         });
 
         document.getElementById('sharePostBtn').addEventListener('click', sendMessage);
