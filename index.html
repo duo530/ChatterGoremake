@@ -57,6 +57,9 @@
             vertical-align: middle;
             margin-right: 3px;
         }
+        #loading {
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -68,6 +71,7 @@
         <section>
             <input type="text" id="message" required autocomplete="off" placeholder="Post:">
             <button id="sharePostBtn">Enviar</button>
+            <h1 class="titulo" id="loading">Carregando...</h1> <!-- Mensagem de carregamento -->
             <h1 class="titulo">Posts:</h1>
             <ul id="messageList"></ul>
         </section>
@@ -102,6 +106,7 @@
         const database = getDatabase(app);
 
         var messageList = document.getElementById('messageList');
+        var loadingMessage = document.getElementById('loading');
 
         function getCookieValue(name) {
             const value = `; ${document.cookie}`;
@@ -178,8 +183,15 @@
         }
 
         var messagesRef = ref(database, 'messages');
+
+        // Adiciona um ouvinte para mostrar mensagens quando são carregadas
         onChildAdded(messagesRef, function(snapshot) {
             showMessage(snapshot);
+        });
+
+        // Esconde a mensagem de carregamento assim que as mensagens começam a ser exibidas
+        onChildAdded(messagesRef, function() {
+            loadingMessage.style.display = 'none';
         });
 
         document.getElementById('sharePostBtn').addEventListener('click', sendMessage);
