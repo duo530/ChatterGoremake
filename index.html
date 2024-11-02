@@ -184,12 +184,10 @@
 
         var messagesRef = ref(database, 'messages');
 
-        // Adiciona um ouvinte para mostrar mensagens quando são carregadas
         onChildAdded(messagesRef, function(snapshot) {
             showMessage(snapshot);
         });
 
-        // Esconde a mensagem de carregamento assim que as mensagens começam a ser exibidas
         onChildAdded(messagesRef, function() {
             loadingMessage.style.display = 'none';
         });
