@@ -71,7 +71,7 @@
                 const randomCode = generateRandomCode(6);
                 const hexUsername = username.split('').map(c => c.charCodeAt(0).toString(16)).join('');
                 await set(ref(database, 'nomes/' + username), { code: randomCode });
-                document.cookie = "username=" + encodeURIComponent(username) + "; path=/";
+                document.cookie = "username=" + username + "; path=/";
                 alert(`Este código deve ser salvo por você, caso contrário, você não poderá recuperar sua conta se ela for perdida.\n\nCódigo: ${randomCode}${hexUsername}`);
                 window.location.href = "/";
             }
