@@ -190,30 +190,50 @@
         }
 
         async function showMessage(snapshot) {
-            var nickname = snapshot.val().nickname;
-            var message = snapshot.val().message;
-            var timestamp = snapshot.val().timestamp;
+    var nickname = snapshot.val().nickname;
+    var message = snapshot.val().message;
+    var timestamp = snapshot.val().timestamp;
 
-            var li = document.createElement('li');
+    var li = document.createElement('li');
 
-            const isAdminUser = await isAdmin(nickname);
-            const photoLink = getCookieValue("photoLink");
+    const isAdminUser = await isAdmin(nickname);
+    const photoLink = getCookieValue("photoLink");
 
-            if (photoLink) {
-                var avatar = document.createElement('img');
-                avatar.src = photoLink;
-                avatar.alt = "Avatar";
-                avatar.className = "photo-avatar";
-                li.insertBefore(avatar, li.firstChild);  // Adiciona a imagem como primeira criança do elemento `li`
-            }
+    if (photoLink) {
+        var avatar = document.createElement('img');
+        avatar.src = photoLink;
+        avatar.alt = "Avatar";
+        avatar.className = "photo-avatar";
+        li.appendChild(avatar);
+    }
 
-            if (isAdminUser) {
-                var adminIcon = document.createElement('img');
-                adminIcon.src = "https://iili.io/2oExBWl.md.jpg";
-                adminIcon.alt = "Admin";
-                adminIcon.className = "admin-icon";
-                li.appendChild(adminIcon);
-            }
+    li.innerHTML += nickname + ': ' + message;
+
+    if (isAdminUser) {
+        var adminIcon = document.createElement('img');
+        adminIcon.src = "https://iili.io/2oExBWl.md.jpg";
+        adminIcon.alt = "Admin";
+        adminIcon.className = "admin-icon";
+        li.appendChild(adminIcon);
+    }
+
+    var photoRegex = /\(Foto:(https?:\/\/[^\s]+)\)/i;
+    var photoMatch = message.match(photoRegex);
+
+    if (photoMatch) {
+        var imageUrl = photoMatch[1];
+        message = message.replace(photoRegex, '');
+
+        var img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = "Imagem enviada";
+        img.className = "message-image";
+        li.appendChild(img);
+    }
+
+    li.innerHTML += '<br><span class="message-date">' + timestamp + '</span>';
+    messageList.prepend(li);
+}
 
             var photoRegex = /\(Foto:(https?:\/\/[^\s]+)\)/i;
             var photoMatch = message.match(photoRegex);
