@@ -24,6 +24,18 @@
         #messageList li {
             color: white;
             margin-bottom: 10px;
+            padding: 15px;
+            border: 1px solid green;
+            border-radius: 8px;
+            position: relative;
+        }
+        .comment-icon {
+            font-size: 1.2em;
+            color: #00ff00;
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            cursor: pointer;
         }
         input {
             padding: 10px;
@@ -57,6 +69,11 @@
             vertical-align: middle;
             margin-right: 3px;
         }
+        .reply-container {
+            margin-top: 10px;
+            color: white;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -87,7 +104,7 @@
         import { getDatabase, ref, set, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBoQUZVo5GvpIt1Diw0Dh7VMwKzbmFonv0",
+            apiKey: "API_KEY",
             authDomain: "chattergodatabase1.firebaseapp.com",
             databaseURL: "https://chattergodatabase1-default-rtdb.firebaseio.com",
             projectId: "chattergodatabase1",
@@ -172,9 +189,21 @@
                 img.className = "message-image";
                 li.appendChild(img);
             } 
-            
+
             li.innerHTML += '<br><span class="message-date">' + timestamp + '</span>';
+            li.innerHTML += `<span class="comment-icon" onclick="replyMessage('${nickname}', '${message}')">💬</span>`;
+
             messageList.prepend(li);
+        }
+
+        function replyMessage(nickname, message) {
+            const replyText = prompt("Digite sua resposta:");
+            if (replyText) {
+                const replyMessage = document.createElement("div");
+                replyMessage.className = "reply-container";
+                replyMessage.innerHTML = `<strong>Respondendo a @${nickname}: "${message}"</strong><br>${replyText}`;
+                messageList.prepend(replyMessage);
+            }
         }
 
         var messagesRef = ref(database, 'messages');
