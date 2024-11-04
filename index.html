@@ -29,14 +29,6 @@
             border-radius: 8px;
             position: relative;
         }
-        .comment-icon {
-            font-size: 1.2em;
-            color: #00ff00;
-            position: absolute;
-            bottom: 5px;
-            right: 10px;
-            cursor: pointer;
-        }
         input {
             padding: 10px;
             margin: 5px;
@@ -69,10 +61,27 @@
             vertical-align: middle;
             margin-right: 3px;
         }
-        .reply-container {
-            margin-top: 10px;
+        .photo-input-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
             color: white;
-            font-size: 0.9em;
+            text-align: center;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid green;
+        }
+        .photo-input-container input {
+            width: 150px;
+            margin-top: 5px;
+        }
+        .photo-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
         }
     </style>
 </head>
@@ -81,6 +90,12 @@
     <div class="container">
         <h1 class="titulo">ChatterGo</h1>
         <p class="subtitulo">Fórum aleatório, programado por recoil999 (html sênior) (todos os créditos vão a ele)</p>
+
+        <div class="photo-input-container">
+            <label for="photoLink">Insira o link da sua foto...</label><br>
+            <input type="text" id="photoLink" placeholder="URL da sua foto"><br>
+            <button onclick="savePhotoLink()">Usar foto</button>
+        </div>
 
         <section>
             <input type="text" id="message" required autocomplete="off" placeholder="Post:">
@@ -127,6 +142,21 @@
             return null;
         }
 
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + d.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        function savePhotoLink() {
+            const photoLink = document.getElementById('photoLink').value;
+            if (photoLink) {
+                setCookie("photoLink", photoLink, 7);
+                alert("Link da foto salvo!");
+            }
+        }
+
         function sendMessage() {
             var nickname = getCookieValue("username"); 
             var messageInput = document.getElementById('message');
@@ -166,6 +196,16 @@
             var li = document.createElement('li');
 
             const isAdminUser = await isAdmin(nickname);
+            const photoLink = getCookieValue("photoLink");
+
+            if (photoLink) {
+                var avatar = document.createElement('img');
+                avatar.src = photoLink;
+                avatar.alt = "Avatar";
+                avatar.className = "photo-avatar";
+                li.appendChild(avatar);
+            }
+
             if (isAdminUser) {
                 var adminIcon = document.createElement('img');
                 adminIcon.src = "https://iili.io/2oExBWl.md.jpg";
@@ -191,19 +231,7 @@
             } 
 
             li.innerHTML += '<br><span class="message-date">' + timestamp + '</span>';
-            li.innerHTML += `<span class="comment-icon" onclick="replyMessage('${nickname}', '${message}')">💬</span>`;
-
             messageList.prepend(li);
-        }
-
-        function replyMessage(nickname, message) {
-            const replyText = prompt("Digite sua resposta:");
-            if (replyText) {
-                const replyMessage = document.createElement("div");
-                replyMessage.className = "reply-container";
-                replyMessage.innerHTML = `<strong>Respondendo a @${nickname}: "${message}"</strong><br>${replyText}`;
-                messageList.prepend(replyMessage);
-            }
         }
 
         var messagesRef = ref(database, 'messages');
