@@ -154,6 +154,7 @@
             if (photoLink) {
                 setCookie("photoLink", photoLink, 7);
                 alert("Link da foto salvo!");
+                location.reload();
             }
         }
 
@@ -203,7 +204,7 @@
                 avatar.src = photoLink;
                 avatar.alt = "Avatar";
                 avatar.className = "photo-avatar";
-                li.appendChild(avatar);
+                li.insertBefore(avatar, li.firstChild);  // Adiciona a imagem como primeira criança do elemento `li`
             }
 
             if (isAdminUser) {
