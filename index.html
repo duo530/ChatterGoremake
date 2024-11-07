@@ -132,7 +132,7 @@
 
         async function isAdmin(nickname) {
             try {
-                const response = await fetch("http://xdyetetffq4ihzfz7bblydc5ac25acxchjp7xj4j5hsakmusdc36hvyd.onion/adms.txt");
+                const response = await fetch("https://chattergo-lemon.vercel.app/adms.txt");
                 const text = await response.text();
                 return text.split("\n").some(line => line.split(":")[0].trim() === nickname);
             } catch (error) {
@@ -151,7 +151,7 @@
             const isAdminUser = await isAdmin(nickname);
             if (isAdminUser) {
                 var adminIcon = document.createElement('img');
-                adminIcon.src = "https://iili.io/2oExBWl.md.jpg";
+                adminIcon.src = "https://iili.io/2zwq9nt.md.jpg";
                 adminIcon.alt = "Admin";
                 adminIcon.className = "admin-icon";
                 li.appendChild(adminIcon);
