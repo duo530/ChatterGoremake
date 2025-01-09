@@ -24,10 +24,11 @@
         const database = getDatabase(app);
 
         function verificarSenha(senha) {
-    const senhaHash = createHash('sha512').update(senha).digest('hex');
-    const senhaEsperada = "5f8e025f2ffbcf375989f474d1be576fa06c2b2e3cd1aeecea6d08277a2ed18e2f3c9055ccbc6dc8161458ec3369b672812c88a15aa174015b2f5537f46a0a56"; 
-    return senhaHash === senhaEsperada;
-}
+            senha = senha.trim();
+            const senhaHash = createHash('sha512').update(senha).digest('hex');
+            const senhaEsperada = "5f8e025f2ffbcf375989f474d1be576fa06c2b2e3cd1aeecea6d08277a2ed18e2f3c9055ccbc6dc8161458ec3369b672812c88a15aa174015b2f5537f46a0a56";
+            return senhaHash === senhaEsperada;
+        }
 
         function banirUsuario(nomeUsuario) {
             const usuariosRef = ref(database, 'usuarios/');
